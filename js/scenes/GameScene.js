@@ -12,6 +12,43 @@ class GameScene extends BaseScene {
     this.currentLevel = null; // 当前关卡实例
     this.backButton = null;
     this.retryButton = null;
+    
+    // 图片资源缓存
+    this.images = {};
+    this.loadImages();
+  }
+
+  loadImages() {
+    // 预加载游戏图片资源
+    const imageList = [
+      { key: 'coffee', path: 'images/game_assets/coffee.png' },
+      { key: 'clock_machine', path: 'images/game_assets/clock_machine.png' },
+      { key: 'colleague_happy', path: 'images/game_assets/colleague_happy.png' },
+      { key: 'player_sad', path: 'images/game_assets/player_sad.png' },
+      { key: 'broom', path: 'images/game_assets/broom.png' },
+      { key: 'copier', path: 'images/game_assets/copier.png' },
+      { key: 'lunch_card', path: 'images/game_assets/lunch_card.png' },
+      { key: 'computer_bluescreen', path: 'images/game_assets/computer_bluescreen.png' },
+      { key: 'toilet_door', path: 'images/game_assets/toilet_door.png' },
+      { key: 'instant_coffee', path: 'images/game_assets/instant_coffee.png' },
+      { key: 'package_box', path: 'images/game_assets/package_box.png' },
+      { key: 'folding_chair', path: 'images/game_assets/folding_chair.png' },
+      { key: 'usb_drive', path: 'images/game_assets/usb_drive.png' },
+      { key: 'boss', path: 'images/game_assets/boss.png' },
+      { key: 'company_door', path: 'images/game_assets/company_door.png' }
+    ];
+
+    imageList.forEach(item => {
+      const img = wx.createImage();
+      img.src = item.path;
+      img.onload = () => {
+        console.log(`图片加载成功: ${item.key}`);
+      };
+      img.onerror = (err) => {
+        console.error(`图片加载失败: ${item.key}`, err);
+      };
+      this.images[item.key] = img;
+    });
   }
 
   init(data) {
@@ -127,7 +164,32 @@ class GameScene extends BaseScene {
   drawCharacter(element) {
     const expression = element.expression || 'normal';
     
-    this.drawStickman(element.x, element.y, 1.5, expression);
+    // 尝试使用图片，如果没有则使用Canvas绘制
+    let imageKey = null;
+    if (element.id === 'player' && expression === 'sad') {
+      imageKey = 'player_sad';
+    } else if (element.id === 'colleague') {
+      if (expression === 'happy') {
+        imageKey = 'colleague_happy';
+      } else {
+        imageKey = 'colleague_happy'; // 默认也用开心表情
+      }
+    }
+
+    if (imageKey && this.images[imageKey] && this.images[imageKey].complete) {
+      // 使用图片渲染
+      const size = 120;
+      this.ctx.drawImage(
+        this.images[imageKey],
+        element.x - size / 2,
+        element.y - size / 2,
+        size,
+        size
+      );
+    } else {
+      // 使用Canvas绘制
+      this.drawStickman(element.x, element.y, 1.5, expression);
+    }
     
     // 绘制角色名称
     this.drawText(element.name, element.x, element.y + 100, 20, '#666');
@@ -165,6 +227,47 @@ class GameScene extends BaseScene {
       
       // 快递标签
       this.drawText('📦', element.x + element.width / 2, element.y + element.height / 2, 30, '#333');
+    } else if (element.id === 'machine') {
+      // 使用图片或Canvas绘制打卡机
+      if (this.images['clock_machine'] && this.images['clock_machine'].complete) {
+        const size = Math.max(element.width, element.height);
+        this.ctx.drawImage(
+          this.images['clock_machine'],
+          element.x + element.width / 2 - size / 2,
+          element.y + element.height / 2 - size / 2,
+          size,
+          size
+        );
+      } else {
+        // Canvas绘制打卡机
+        ctx.fillStyle = '#555';
+        ctx.fillRect(element.x, element.y, element.width, element.height);
+        
+        // 屏幕
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(element.x + element.width * 0.1, element.y + element.height * 0.1, element.width * 0.8, element.height * 0.4);
+        
+        // 刷卡区域
+        ctx.fillStyle = '#333';
+        ctx.fillRect(element.x + element.width * 0.1, element.y + element.height * 0.6, element.width * 0.8, element.height * 0.25);
+        
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(element.x, element.y, element.width, element.height);
+      }
+      
+      this.drawText(element.name, element.x + element.width / 2, element.y + element.height + 30, 18, '#666');
+    } else {
+      // 默认绘制：简单矩形
+      ctx.fillStyle = '#999';
+      ctx.fillRect(element.x, element.y, element.width || 80, element.height || 80);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(element.x, element.y, element.width || 80, element.height || 80);
+      
+      if (element.name) {
+        this.drawText(element.name, element.x + (element.width || 80) / 2, element.y + (element.height || 80) / 2, 18, '#fff');
+      }
     }
   }
 
@@ -172,19 +275,89 @@ class GameScene extends BaseScene {
     const ctx = this.ctx;
 
     if (element.id === 'broom') {
-      // 绘制扫帚
-      ctx.strokeStyle = '#8B4513';
-      ctx.lineWidth = 4;
+      // 使用图片或Canvas绘制扫帚
+      if (this.images['broom'] && this.images['broom'].complete) {
+        const size = 80;
+        this.ctx.drawImage(
+          this.images['broom'],
+          element.x - size / 2,
+          element.y - size / 2,
+          size,
+          size
+        );
+      } else {
+        // Canvas绘制扫帚
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(element.x, element.y - 40);
+        ctx.lineTo(element.x, element.y + 20);
+        ctx.stroke();
+        
+        // 扫帚头
+        ctx.fillStyle = '#D2691E';
+        ctx.fillRect(element.x - 10, element.y + 20, 20, 30);
+      }
+      
+      this.drawText(element.name, element.x, element.y + 55, 18, '#666');
+    } else if (element.id === 'coffee') {
+      // 使用图片或Canvas绘制咖啡
+      if (this.images['coffee'] && this.images['coffee'].complete) {
+        const size = 80;
+        this.ctx.drawImage(
+          this.images['coffee'],
+          element.x - size / 2,
+          element.y - size / 2,
+          size,
+          size
+        );
+      } else {
+        // Canvas绘制咖啡
+        // 杯子
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.moveTo(element.x - 20, element.y + 10);
+        ctx.lineTo(element.x - 15, element.y - 20);
+        ctx.lineTo(element.x + 15, element.y - 20);
+        ctx.lineTo(element.x + 20, element.y + 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // 咖啡液
+        ctx.fillStyle = '#8B4513';
+        ctx.beginPath();
+        ctx.moveTo(element.x - 18, element.y + 5);
+        ctx.lineTo(element.x - 14, element.y - 15);
+        ctx.lineTo(element.x + 14, element.y - 15);
+        ctx.lineTo(element.x + 18, element.y + 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 把手
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(element.x + 25, element.y - 5, 10, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+      }
+      
+      this.drawText(element.name, element.x, element.y + 55, 18, '#666');
+    } else {
+      // 默认绘制：简单圆形或图标
+      ctx.fillStyle = '#FFD700';
       ctx.beginPath();
-      ctx.moveTo(element.x, element.y - 40);
-      ctx.lineTo(element.x, element.y + 20);
+      ctx.arc(element.x, element.y, 25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
       ctx.stroke();
       
-      // 扫帚头
-      ctx.fillStyle = '#D2691E';
-      ctx.fillRect(element.x - 10, element.y + 20, 20, 30);
-      
-      this.drawText('扫帚', element.x, element.y + 70, 18, '#666');
+      if (element.name) {
+        this.drawText(element.name, element.x, element.y + 40, 18, '#666');
+      }
     }
   }
 
