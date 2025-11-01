@@ -133,6 +133,19 @@ class Level03 extends BaseLevel {
     const player = this.elements.find(e => e.id === 'player');
     if (player) player.expression = 'sad';
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120);
+      } else if (element.id === 'drawer') {
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height));
+      } else if (element.id === 'window') {
+        this.drawElement(ctx, element, images, 'canteen_window', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level03;

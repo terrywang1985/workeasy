@@ -131,6 +131,19 @@ class Level07 extends BaseLevel {
     const boss = this.elements.find(e => e.id === 'boss');
     if (boss) boss.expression = 'normal';
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120);
+      } else if (element.id === 'boss') {
+        this.drawElement(ctx, element, images, 'boss', 120);
+      } else if (element.id === 'package') {
+        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level07;

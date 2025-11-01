@@ -125,6 +125,19 @@ class Level05 extends BaseLevel {
     const phone = this.elements.find(e => e.id === 'phone');
     if (phone) phone.visible = true;
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        const imageKey = element.expression === 'normal' ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120);
+      } else if (element.id === 'boss') {
+        this.drawElement(ctx, element, images, 'boss', 120);
+      } else if (element.id === 'phone') {
+        this.drawElement(ctx, element, images, 'phone', 60);
+      }
+    });
+  }
 }
 
 module.exports = Level05;

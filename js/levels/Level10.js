@@ -172,6 +172,20 @@ class Level10 extends BaseLevel {
     const boss = this.elements.find(e => e.id === 'boss');
     if (boss) boss.visible = true;
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        this.drawElement(ctx, element, images, 'player_sad', 120);
+      } else if (element.id === 'computer') {
+        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height));
+      } else if (element.id === 'boss') {
+        this.drawElement(ctx, element, images, 'boss', 120);
+      } else if (element.id === 'machine') {
+        this.drawElement(ctx, element, images, 'clock_machine', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level10;

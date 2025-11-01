@@ -125,6 +125,63 @@ class Level02 extends BaseLevel {
     return '手指被复印机夹了，疼死了！';
   }
 
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120);
+      } else if (element.id === 'copier') {
+        this.drawElement(ctx, element, images, 'copier', Math.max(element.width, element.height));
+      } else if (element.id === 'manual') {
+        // 绘制说明书（像一本书）
+        if (element.visible !== false) {
+          const bookW = 50;
+          const bookH = 65;
+          const bookX = element.x - bookW / 2;
+          const bookY = element.y - bookH / 2;
+          
+          // 书的侧面（立体感）
+          ctx.fillStyle = '#6B4423';
+          ctx.fillRect(bookX + 3, bookY + 3, bookW, bookH);
+          
+          // 书的封面
+          ctx.fillStyle = '#8B4513';
+          ctx.fillRect(bookX, bookY, bookW, bookH);
+          
+          // 书脉
+          ctx.strokeStyle = '#5D3A1A';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(bookX + bookW / 2, bookY);
+          ctx.lineTo(bookX + bookW / 2, bookY + bookH);
+          ctx.stroke();
+          
+          // 边框
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(bookX, bookY, bookW, bookH);
+          
+          // 标题（竖向文字）
+          ctx.save();
+          ctx.fillStyle = '#FFD700';
+          ctx.font = 'bold 14px Arial';
+          ctx.textAlign = 'center';
+          ctx.translate(bookX + bookW / 2, bookY + bookH / 2);
+          ctx.rotate(-Math.PI / 2);
+          ctx.fillText('说明书', 0, 5);
+          ctx.restore();
+          
+          // 名称标签
+          ctx.fillStyle = '#333';
+          ctx.font = '18px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(element.name, element.x, element.y + 40);
+        }
+      }
+    });
+  }
+
   reset() {
     super.reset();
     this.readManual = false;

@@ -49,9 +49,61 @@ class BaseLevel {
    * 自定义渲染（在标准元素渲染之后）
    * 子类可选实现
    * @param {CanvasRenderingContext2D} ctx 
+   * @param {Object} images - 图片资源对象
    */
-  customRender(ctx) {
+  customRender(ctx, images) {
     // 子类可以重写此方法添加自定义渲染
+  }
+
+  /**
+   * 通用的绘制元素方法（供子类调用）
+   * @param {CanvasRenderingContext2D} ctx 
+   * @param {Object} element - 元素对象
+   * @param {Object} images - 图片资源对象
+   * @param {string} imageKey - 图片key
+   * @param {number} size - 图片大小
+   */
+  drawElement(ctx, element, images, imageKey, size = 100) {
+    if (element.visible === false) return;
+
+    // 绘制图片
+    if (imageKey && images[imageKey] && images[imageKey].complete) {
+      if (element.type === 'object') {
+        // object类型：以矩形中心为原点
+        ctx.drawImage(
+          images[imageKey],
+          element.x + element.width / 2 - size / 2,
+          element.y + element.height / 2 - size / 2,
+          size,
+          size
+        );
+      } else {
+        // character/item类型：以坐标为中心
+        ctx.drawImage(
+          images[imageKey],
+          element.x - size / 2,
+          element.y - size / 2,
+          size,
+          size
+        );
+      }
+    }
+
+    // 绘制文字标签
+    if (element.name) {
+      ctx.fillStyle = '#333';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      
+      if (element.type === 'object') {
+        ctx.fillText(element.name, element.x + element.width / 2, element.y + element.height + 10);
+      } else if (element.type === 'character') {
+        ctx.fillText(element.name, element.x, element.y + 70);
+      } else {
+        ctx.fillText(element.name, element.x, element.y + 50);
+      }
+    }
   }
 
   /**

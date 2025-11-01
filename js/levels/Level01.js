@@ -151,6 +151,22 @@ class Level01 extends BaseLevel {
     return '保安：没工卡不能进！';
   }
 
+  customRender(ctx, images) {
+    // 绘制所有元素
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        this.drawElement(ctx, element, images, 'player_sad', 120);
+      } else if (element.id === 'colleague') {
+        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'colleague_happy';
+        this.drawElement(ctx, element, images, imageKey, 120);
+      } else if (element.id === 'machine') {
+        this.drawElement(ctx, element, images, 'clock_machine', Math.max(element.width, element.height));
+      } else if (element.id === 'coffee') {
+        this.drawElement(ctx, element, images, 'coffee', 80);
+      }
+    });
+  }
+
   reset() {
     super.reset();
     this.hasCoffee = false;

@@ -208,33 +208,45 @@ class Level31 extends BaseLevel {
   /**
    * 自定义渲染
    */
-  customRender(ctx) {
-    // 如果玩家伪装了，给玩家绘制扫帚
-    if (this.playerDisguised) {
-      const player = this.elements.find(e => e.id === 'player');
-      if (player) {
-        ctx.save();
-        ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(player.x + 30, player.y - 20);
-        ctx.lineTo(player.x + 30, player.y + 40);
-        ctx.stroke();
+  customRender(ctx, images) {
+    // 绘制所有元素
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120);
         
-        // 扫帚头
-        ctx.fillStyle = '#D2691E';
-        ctx.fillRect(player.x + 20, player.y + 40, 20, 30);
-        ctx.restore();
+        // 如果玩家伪装了，给玩家绘制扫帚（夹在腙下）
+        if (this.playerDisguised && images['broom'] && images['broom'].complete) {
+          const broomSize = 70;
+          ctx.save();
+          // 扫帚夹在腙下，从左上方向右下方倾斜
+          ctx.translate(element.x + 25, element.y - 10);
+          ctx.rotate(Math.PI / 4); // 45度倾斜
+          ctx.drawImage(
+            images['broom'],
+            0,
+            0,
+            broomSize,
+            broomSize
+          );
+          ctx.restore();
+        }
+      } else if (element.id === 'boss') {
+        this.drawElement(ctx, element, images, 'boss', 120);
+      } else if (element.id === 'door') {
+        this.drawElement(ctx, element, images, 'company_door', Math.max(element.width, element.height));
+      } else if (element.id === 'broom') {
+        // 如果扫帚被拿走了，不显示
+        if (this.playerDisguised) {
+          element.visible = false;
+        } else {
+          element.visible = true;
+          this.drawElement(ctx, element, images, 'broom', 80);
+        }
+      } else if (element.id === 'box') {
+        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height));
       }
-    }
-    
-    // 如果扫帚被拿走了，不显示扫帚元素
-    const broomElement = this.elements.find(e => e.id === 'broom');
-    if (broomElement && this.playerDisguised) {
-      broomElement.visible = false;
-    } else if (broomElement) {
-      broomElement.visible = true;
-    }
+    });
   }
 
   /**

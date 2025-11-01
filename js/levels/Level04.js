@@ -128,6 +128,18 @@ class Level04 extends BaseLevel {
     super.reset();
     this.askedIT = false;
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        this.drawElement(ctx, element, images, 'player_sad', 120);
+      } else if (element.id === 'it') {
+        this.drawElement(ctx, element, images, 'colleague_happy', 120);
+      } else if (element.id === 'computer') {
+        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level04;

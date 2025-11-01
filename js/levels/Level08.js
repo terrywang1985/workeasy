@@ -109,6 +109,18 @@ class Level08 extends BaseLevel {
   reset() {
     super.reset();
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        this.drawElement(ctx, element, images, 'player_sad', 120);
+      } else if (element.id === 'chair1') {
+        this.drawElement(ctx, element, images, 'office_chair', Math.max(element.width, element.height));
+      } else if (element.id === 'foldChair') {
+        this.drawElement(ctx, element, images, 'folding_chair', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level08;

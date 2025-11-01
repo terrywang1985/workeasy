@@ -35,7 +35,13 @@ class GameScene extends BaseScene {
       { key: 'folding_chair', path: 'images/game_assets/folding_chair.png' },
       { key: 'usb_drive', path: 'images/game_assets/usb_drive.png' },
       { key: 'boss', path: 'images/game_assets/boss.png' },
-      { key: 'company_door', path: 'images/game_assets/company_door.png' }
+      { key: 'company_door', path: 'images/game_assets/company_door.png' },
+      { key: 'phone', path: 'images/game_assets/phone.png' },
+      { key: 'water_dispenser', path: 'images/game_assets/water_dispenser.png' },
+      { key: 'office_chair', path: 'images/game_assets/office_chair.png' },
+      { key: 'email_icon', path: 'images/game_assets/email_icon.png' },
+      { key: 'drawer', path: 'images/game_assets/drawer.png' },
+      { key: 'canteen_window', path: 'images/game_assets/canteen_window.png' }
     ];
 
     imageList.forEach(item => {
@@ -82,13 +88,8 @@ class GameScene extends BaseScene {
     // 绘制顶部信息
     this.drawTopInfo();
 
-    // 绘制场景元素
+    // 绘制场景元素（关卡自己实现 customRender 方法）
     this.drawSceneElements();
-
-    // 绘制关卡自定义内容
-    if (this.currentLevel && this.currentLevel.customRender) {
-      this.currentLevel.customRender(this.ctx);
-    }
 
     // 绘制游戏状态提示
     if (this.currentLevel && (this.currentLevel.checkSuccess() || this.currentLevel.checkFailed())) {
@@ -141,225 +142,15 @@ class GameScene extends BaseScene {
   }
 
   drawSceneElements() {
-    const config = this.currentLevel.getConfig();
-    const elements = config.elements;
-
-    // 根据关卡元素绘制场景
-    elements.forEach(element => {
-      // 检查元素是否可见（支持动态隐藏）
-      if (element.visible === false) {
-        return;
-      }
-      
-      if (element.type === 'character') {
-        this.drawCharacter(element);
-      } else if (element.type === 'object') {
-        this.drawObject(element);
-      } else if (element.type === 'item') {
-        this.drawItem(element);
-      }
-    });
-  }
-
-  drawCharacter(element) {
-    const expression = element.expression || 'normal';
-    
-    // 尝试使用图片，如果没有则使用Canvas绘制
-    let imageKey = null;
-    if (element.id === 'player' && expression === 'sad') {
-      imageKey = 'player_sad';
-    } else if (element.id === 'colleague') {
-      if (expression === 'happy') {
-        imageKey = 'colleague_happy';
-      } else {
-        imageKey = 'colleague_happy'; // 默认也用开心表情
-      }
-    }
-
-    if (imageKey && this.images[imageKey] && this.images[imageKey].complete) {
-      // 使用图片渲染
-      const size = 120;
-      this.ctx.drawImage(
-        this.images[imageKey],
-        element.x - size / 2,
-        element.y - size / 2,
-        size,
-        size
-      );
-    } else {
-      // 使用Canvas绘制
-      this.drawStickman(element.x, element.y, 1.5, expression);
-    }
-    
-    // 绘制角色名称
-    this.drawText(element.name, element.x, element.y + 100, 20, '#666');
-  }
-
-  drawObject(element) {
-    const ctx = this.ctx;
-
-    if (element.id === 'door') {
-      // 绘制公司大门
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(element.x, element.y, element.width, element.height);
-      
-      // 门把手
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(element.x + element.width - 20, element.y + element.height / 2, 8, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // 门牌
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(element.x + 20, element.y + 20, 60, 40);
-      this.drawText('公司', element.x + 50, element.y + 40, 20, '#333');
-      
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-    } else if (element.id === 'box') {
-      // 绘制快递箱
-      ctx.fillStyle = '#D2691E';
-      ctx.fillRect(element.x, element.y, element.width, element.height);
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-      
-      // 快递标签
-      this.drawText('📦', element.x + element.width / 2, element.y + element.height / 2, 30, '#333');
-    } else if (element.id === 'machine') {
-      // 使用图片或Canvas绘制打卡机
-      if (this.images['clock_machine'] && this.images['clock_machine'].complete) {
-        const size = Math.max(element.width, element.height);
-        this.ctx.drawImage(
-          this.images['clock_machine'],
-          element.x + element.width / 2 - size / 2,
-          element.y + element.height / 2 - size / 2,
-          size,
-          size
-        );
-      } else {
-        // Canvas绘制打卡机
-        ctx.fillStyle = '#555';
-        ctx.fillRect(element.x, element.y, element.width, element.height);
-        
-        // 屏幕
-        ctx.fillStyle = '#87CEEB';
-        ctx.fillRect(element.x + element.width * 0.1, element.y + element.height * 0.1, element.width * 0.8, element.height * 0.4);
-        
-        // 刷卡区域
-        ctx.fillStyle = '#333';
-        ctx.fillRect(element.x + element.width * 0.1, element.y + element.height * 0.6, element.width * 0.8, element.height * 0.25);
-        
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(element.x, element.y, element.width, element.height);
-      }
-      
-      this.drawText(element.name, element.x + element.width / 2, element.y + element.height + 30, 18, '#666');
-    } else {
-      // 默认绘制：简单矩形
-      ctx.fillStyle = '#999';
-      ctx.fillRect(element.x, element.y, element.width || 80, element.height || 80);
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(element.x, element.y, element.width || 80, element.height || 80);
-      
-      if (element.name) {
-        this.drawText(element.name, element.x + (element.width || 80) / 2, element.y + (element.height || 80) / 2, 18, '#fff');
-      }
+    // 关卡自己负责绘制所有元素
+    // GameScene 只提供图片资源和绘图上下文
+    if (this.currentLevel && this.currentLevel.customRender) {
+      this.currentLevel.customRender(this.ctx, this.images);
     }
   }
 
-  drawItem(element) {
-    const ctx = this.ctx;
-
-    if (element.id === 'broom') {
-      // 使用图片或Canvas绘制扫帚
-      if (this.images['broom'] && this.images['broom'].complete) {
-        const size = 80;
-        this.ctx.drawImage(
-          this.images['broom'],
-          element.x - size / 2,
-          element.y - size / 2,
-          size,
-          size
-        );
-      } else {
-        // Canvas绘制扫帚
-        ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(element.x, element.y - 40);
-        ctx.lineTo(element.x, element.y + 20);
-        ctx.stroke();
-        
-        // 扫帚头
-        ctx.fillStyle = '#D2691E';
-        ctx.fillRect(element.x - 10, element.y + 20, 20, 30);
-      }
-      
-      this.drawText(element.name, element.x, element.y + 55, 18, '#666');
-    } else if (element.id === 'coffee') {
-      // 使用图片或Canvas绘制咖啡
-      if (this.images['coffee'] && this.images['coffee'].complete) {
-        const size = 80;
-        this.ctx.drawImage(
-          this.images['coffee'],
-          element.x - size / 2,
-          element.y - size / 2,
-          size,
-          size
-        );
-      } else {
-        // Canvas绘制咖啡
-        // 杯子
-        ctx.fillStyle = '#FFF';
-        ctx.beginPath();
-        ctx.moveTo(element.x - 20, element.y + 10);
-        ctx.lineTo(element.x - 15, element.y - 20);
-        ctx.lineTo(element.x + 15, element.y - 20);
-        ctx.lineTo(element.x + 20, element.y + 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // 咖啡液
-        ctx.fillStyle = '#8B4513';
-        ctx.beginPath();
-        ctx.moveTo(element.x - 18, element.y + 5);
-        ctx.lineTo(element.x - 14, element.y - 15);
-        ctx.lineTo(element.x + 14, element.y - 15);
-        ctx.lineTo(element.x + 18, element.y + 5);
-        ctx.closePath();
-        ctx.fill();
-        
-        // 把手
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(element.x + 25, element.y - 5, 10, -Math.PI / 2, Math.PI / 2);
-        ctx.stroke();
-      }
-      
-      this.drawText(element.name, element.x, element.y + 55, 18, '#666');
-    } else {
-      // 默认绘制：简单圆形或图标
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(element.x, element.y, 25, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      if (element.name) {
-        this.drawText(element.name, element.x, element.y + 40, 18, '#666');
-      }
-    }
-  }
+  // 已删除 drawCharacter、drawObject、drawItem 方法
+  // 现在由每个关卡自己实现 customRender() 来绘制元素
 
   drawGameResult() {
     const { width, height } = this.config;

@@ -124,6 +124,18 @@ class Level09 extends BaseLevel {
     const usb = this.elements.find(e => e.id === 'usb');
     if (usb) usb.visible = true;
   }
+
+  customRender(ctx, images) {
+    this.elements.forEach(element => {
+      if (element.id === 'player') {
+        this.drawElement(ctx, element, images, 'player_sad', 120);
+      } else if (element.id === 'usb') {
+        this.drawElement(ctx, element, images, 'usb_drive', 60);
+      } else if (element.id === 'email') {
+        this.drawElement(ctx, element, images, 'email_icon', Math.max(element.width, element.height));
+      }
+    });
+  }
 }
 
 module.exports = Level09;
