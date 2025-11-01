@@ -39,20 +39,21 @@ class LevelsScene extends BaseScene {
   }
 
   drawTopBar() {
-    const { width } = this.config;
+    const { width, safeAreaTop } = this.config;
+    const topOffset = Math.max(safeAreaTop, 20);
 
     // 绘制返回按钮（左上角）
-    this.backButton = this.drawCircleButton('←', 60, 60, 40, '#fff', '#333');
+    this.backButton = this.drawCircleButton('←', 60, topOffset + 40, 40, '#fff', '#333');
 
     // 绘制帮助按钮（右上角）
-    this.helpButton = this.drawCircleButton('?', width - 60, 60, 40, '#fff', '#333');
+    this.helpButton = this.drawCircleButton('?', width - 60, topOffset + 40, 40, '#fff', '#333');
 
     // 绘制标题
-    this.drawText('选择关卡', width / 2, 60, 40, '#333');
+    this.drawText('选择关卡', width / 2, topOffset + 40, 40, '#333');
   }
 
   drawLevelGrid() {
-    const { width, height } = this.config;
+    const { width, height, safeAreaTop } = this.config;
     const cols = 5; // 5列
     
     // 根据屏幕宽度动态计算格子大小
@@ -61,7 +62,8 @@ class LevelsScene extends BaseScene {
     const cellSize = Math.floor((width - padding * 2 - gap * (cols - 1)) / cols);
     
     const startX = (width - (cols * cellSize + (cols - 1) * gap)) / 2;
-    const startY = 150;
+    const topOffset = Math.max(safeAreaTop, 20);
+    const startY = topOffset + 120; // 在顶部按钮下方
 
     this.levelButtons = [];
 

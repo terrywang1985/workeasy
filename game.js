@@ -17,6 +17,14 @@ const screenWidth = systemInfo.screenWidth;
 const screenHeight = systemInfo.screenHeight;
 const pixelRatio = systemInfo.pixelRatio;
 
+// 获取安全区域（避开刘海屏）
+const safeArea = systemInfo.safeArea || {
+  top: 0,
+  bottom: screenHeight
+};
+const safeAreaTop = safeArea.top || 0;
+const safeAreaBottom = safeArea.bottom || screenHeight;
+
 // 设置 Canvas 尺寸（物理像素）
 canvas.width = screenWidth * pixelRatio;
 canvas.height = screenHeight * pixelRatio;
@@ -28,7 +36,9 @@ ctx.scale(pixelRatio, pixelRatio);
 const config = {
   width: screenWidth,
   height: screenHeight,
-  pixelRatio: pixelRatio
+  pixelRatio: pixelRatio,
+  safeAreaTop: safeAreaTop,
+  safeAreaBottom: safeAreaBottom
 };
 
 // 初始化场景管理器

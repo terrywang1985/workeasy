@@ -36,7 +36,7 @@ class GameScene extends BaseScene {
   }
 
   render() {
-    const { width, height } = this.config;
+    const { width, height, safeAreaTop } = this.config;
 
     // 绘制背景
     this.ctx.fillStyle = '#F5E6D3';
@@ -58,19 +58,23 @@ class GameScene extends BaseScene {
       this.drawGameResult();
     }
 
-    // 绘制返回按钮
-    this.backButton = this.drawCircleButton('←', 60, 60, 40, '#fff', '#333');
+    // 绘制返回按钮（避开刘海屏）
+    const topOffset = Math.max(safeAreaTop, 20);
+    this.backButton = this.drawCircleButton('←', 60, topOffset + 40, 40, '#fff', '#333');
   }
 
   drawTopInfo() {
-    const { width } = this.config;
+    const { width, safeAreaTop } = this.config;
     const config = this.currentLevel.getConfig();
+    
+    // 计算顶部偏移（避开刘海屏）
+    const topOffset = Math.max(safeAreaTop, 20);
 
     // 绘制关卡标题
     this.drawText(
       `第 ${config.id} 关 ${config.name}`,
       width / 2,
-      60,
+      topOffset + 40,
       36,
       '#333'
     );
@@ -80,7 +84,7 @@ class GameScene extends BaseScene {
     const boxWidth = width - padding * 2;
     const boxHeight = 100;
     const boxX = padding;
-    const boxY = 110;
+    const boxY = topOffset + 90;
     
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     this.ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
@@ -206,12 +210,15 @@ class GameScene extends BaseScene {
     if (this.currentLevel.checkSuccess()) {
       // 成功提示
       this.drawText('🎉 通关成功！', width / 2, boxY + 80, 40, '#4CAF50');
-      this.drawText(
-        this.currentLevel.getSuccessMessage(), 
-        width / 2, 
-        boxY + 150, 
-        24, 
-        '#333'
+      
+      // 绘制成功消息（自动换行）
+      this.drawWrappedText(
+        this.currentLevel.getSuccessMessage(),
+        boxX + 40,
+        boxY + 130,
+        boxWidth - 80,
+        22,
+        28
       );
       
       // 继续按钮（暂时返回选关）
@@ -220,7 +227,7 @@ class GameScene extends BaseScene {
       this.retryButton = this.drawButton(
         '返回选关',
         (width - btnWidth) / 2,
-        boxY + 200,
+        boxY + boxHeight - 80,
         btnWidth,
         btnHeight,
         '#4CAF50',
@@ -229,12 +236,15 @@ class GameScene extends BaseScene {
     } else if (this.currentLevel.checkFailed()) {
       // 失败提示
       this.drawText('❌ 失败了！', width / 2, boxY + 80, 40, '#F44336');
-      this.drawText(
-        this.currentLevel.getFailMessage(), 
-        width / 2, 
-        boxY + 150, 
-        24, 
-        '#333'
+      
+      // 绘制失败消息（自动换行）
+      this.drawWrappedText(
+        this.currentLevel.getFailMessage(),
+        boxX + 40,
+        boxY + 130,
+        boxWidth - 80,
+        22,
+        28
       );
       
       // 重试按钮
@@ -243,7 +253,7 @@ class GameScene extends BaseScene {
       this.retryButton = this.drawButton(
         '重新开始',
         (width - btnWidth) / 2,
-        boxY + 200,
+        boxY + boxHeight - 80,
         btnWidth,
         btnHeight,
         '#F44336',

@@ -17,24 +17,25 @@ class MainScene extends BaseScene {
   }
 
   render() {
-    const { width, height } = this.config;
+    const { width, height, safeAreaTop, safeAreaBottom } = this.config;
     const ctx = this.ctx;
+    const topOffset = Math.max(safeAreaTop, 20);
 
     // 绘制背景
     ctx.fillStyle = '#F5E6D3';
     ctx.fillRect(0, 0, width, height);
 
-    // 绘制游戏标题
-    this.drawText('不正经的员工', width / 2, 150, 60, '#8B4513');
+    // 绘制游戏标题（避开刘海屏）
+    this.drawText('不正经的员工', width / 2, topOffset + 100, 60, '#8B4513');
 
     // 绘制简笔画员工形象
-    this.drawStickman(width / 2, 400, 2, 'happy');
+    this.drawStickman(width / 2, height * 0.45, 2, 'happy');
 
     // 绘制"开始游戏"按钮
     const btnWidth = 300;
     const btnHeight = 80;
     const btnX = (width - btnWidth) / 2;
-    const btnY = 650;
+    const btnY = height * 0.7;
     
     this.startButton = this.drawButton(
       '开始游戏',
@@ -46,8 +47,9 @@ class MainScene extends BaseScene {
       '#333'
     );
 
-    // 绘制版本信息
-    this.drawText('v1.0.0', width / 2, height - 50, 24, '#999');
+    // 绘制版本信息（在安全区域内）
+    const bottomOffset = Math.min(safeAreaBottom, height - 30);
+    this.drawText('v1.0.0', width / 2, bottomOffset - 20, 24, '#999');
   }
 
   onTouchEnd(e) {
