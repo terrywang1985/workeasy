@@ -110,14 +110,14 @@ class Level08 extends BaseLevel {
     super.reset();
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120);
+        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
       } else if (element.id === 'chair1') {
-        this.drawElement(ctx, element, images, 'office_chair', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'office_chair', Math.max(element.width, element.height), offsetY);
       } else if (element.id === 'foldChair') {
-        this.drawElement(ctx, element, images, 'folding_chair', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'folding_chair', Math.max(element.width, element.height), offsetY);
       }
     });
   }

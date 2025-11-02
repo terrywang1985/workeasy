@@ -147,16 +147,16 @@ class Level06 extends BaseLevel {
     this.gotWater = false;
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120);
+        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
       } else if (element.id === 'colleagueA') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120);
+        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
       } else if (element.id === 'colleagueB') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120);
+        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
       } else if (element.id === 'water') {
-        this.drawElement(ctx, element, images, 'water_dispenser', 100);
+        this.drawElement(ctx, element, images, 'water_dispenser', 100, offsetY);
       }
     });
   }

@@ -134,15 +134,15 @@ class Level03 extends BaseLevel {
     if (player) player.expression = 'sad';
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
         const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
-        this.drawElement(ctx, element, images, imageKey, 120);
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'drawer') {
-        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
       } else if (element.id === 'window') {
-        this.drawElement(ctx, element, images, 'canteen_window', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'canteen_window', Math.max(element.width, element.height), offsetY);
       }
     });
   }

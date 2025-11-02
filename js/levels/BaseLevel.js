@@ -15,10 +15,11 @@ class BaseLevel {
 
   /**
    * 初始化关卡
-   * @param {Object} sceneContext - 游戏场景上下文（包含 ctx, config 等）
+   * @param {Object} sceneContext - 游戏场景上下文（包含 ctx, config, topUIOffset 等）
    */
   init(sceneContext) {
     this.sceneContext = sceneContext;
+    this.topUIOffset = sceneContext.topUIOffset || 0; // 整体下移偏移量
     this.gameState = 'playing';
     this.clickedItems = [];
   }
@@ -47,12 +48,13 @@ class BaseLevel {
 
   /**
    * 自定义渲染（在标准元素渲染之后）
-   * 子类可选实现
+   * 子类必须实现
    * @param {CanvasRenderingContext2D} ctx 
    * @param {Object} images - 图片资源对象
+   * @param {number} offsetY - Y轴内容偏移量
    */
-  customRender(ctx, images) {
-    // 子类可以重写此方法添加自定义渲染
+  customRender(ctx, images, offsetY = 0) {
+    // 子类必须重写此方法添加自定义渲染
   }
 
   /**
@@ -62,9 +64,13 @@ class BaseLevel {
    * @param {Object} images - 图片资源对象
    * @param {string} imageKey - 图片key
    * @param {number} size - 图片大小
+   * @param {number} offsetY - Y轴偏移量（默认使用this.topUIOffset）
    */
-  drawElement(ctx, element, images, imageKey, size = 100) {
+  drawElement(ctx, element, images, imageKey, size = 100, offsetY = null) {
     if (element.visible === false) return;
+
+    // 使用传入的offsetY或默认的topUIOffset
+    const actualOffsetY = offsetY !== null ? offsetY : (this.topUIOffset || 0);
 
     // 绘制图片
     if (imageKey && images[imageKey] && images[imageKey].complete) {
@@ -73,7 +79,7 @@ class BaseLevel {
         ctx.drawImage(
           images[imageKey],
           element.x + element.width / 2 - size / 2,
-          element.y + element.height / 2 - size / 2,
+          element.y + element.height / 2 - size / 2 + actualOffsetY,
           size,
           size
         );
@@ -82,7 +88,7 @@ class BaseLevel {
         ctx.drawImage(
           images[imageKey],
           element.x - size / 2,
-          element.y - size / 2,
+          element.y - size / 2 + actualOffsetY,
           size,
           size
         );
@@ -97,11 +103,11 @@ class BaseLevel {
       ctx.textBaseline = 'top';
       
       if (element.type === 'object') {
-        ctx.fillText(element.name, element.x + element.width / 2, element.y + element.height + 10);
+        ctx.fillText(element.name, element.x + element.width / 2, element.y + element.height + 10 + actualOffsetY);
       } else if (element.type === 'character') {
-        ctx.fillText(element.name, element.x, element.y + 70);
+        ctx.fillText(element.name, element.x, element.y + 70 + actualOffsetY);
       } else {
-        ctx.fillText(element.name, element.x, element.y + 50);
+        ctx.fillText(element.name, element.x, element.y + 50 + actualOffsetY);
       }
     }
   }

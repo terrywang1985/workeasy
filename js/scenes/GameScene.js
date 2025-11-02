@@ -11,6 +11,7 @@ class GameScene extends BaseScene {
     this.levelId = null;
     this.currentLevel = null; // 当前关卡实例
     this.backButton = null;
+    this.helpButton = null;
     this.retryButton = null;
     
     // 图片资源缓存
@@ -67,10 +68,14 @@ class GameScene extends BaseScene {
       return;
     }
 
+    // 整体内容下移的偏移量（给顶部留出空间）
+    this.topUIOffset = 65; // 整体下移60像素
+
     // 初始化关卡
     this.currentLevel.init({
       ctx: this.ctx,
-      config: this.config
+      config: this.config,
+      topUIOffset: this.topUIOffset
     });
 
     // 绑定触摸事件
@@ -96,17 +101,20 @@ class GameScene extends BaseScene {
       this.drawGameResult();
     }
 
-    // 绘制返回按钮（避开刘海屏）
+    // 绘制返回按钮（左上角）
     const topOffset = Math.max(safeAreaTop, 20);
     this.backButton = this.drawCircleButton('←', 60, topOffset + 40, 40, '#fff', '#333');
+    
+    // 绘制帮助按钮（右下角）
+    this.helpButton = this.drawCircleButton('?', width - 60, height - 60, 40, '#fff', '#333');
   }
 
   drawTopInfo() {
     const { width, safeAreaTop } = this.config;
     const config = this.currentLevel.getConfig();
     
-    // 计算顶部偏移（避开刘海屏）
-    const topOffset = Math.max(safeAreaTop, 20);
+    // 计算顶部偏移（避开刘海屏 + 整体下移）
+    const topOffset = Math.max(safeAreaTop, 20) + this.topUIOffset;
 
     // 绘制关卡标题
     this.drawText(
@@ -145,7 +153,7 @@ class GameScene extends BaseScene {
     // 关卡自己负责绘制所有元素
     // GameScene 只提供图片资源和绘图上下文
     if (this.currentLevel && this.currentLevel.customRender) {
-      this.currentLevel.customRender(this.ctx, this.images);
+      this.currentLevel.customRender(this.ctx, this.images, this.topUIOffset);
     }
   }
 
@@ -250,6 +258,18 @@ class GameScene extends BaseScene {
       return;
     }
 
+    // 检测帮助按钮
+    if (this.helpButton && this.isPointInCircle(x, y, this.helpButton)) {
+      const config = this.currentLevel.getConfig();
+      wx.showModal({
+        title: `第${config.id}关 - ${config.name}`,
+        content: config.story + '\n\n点击元素尝试不同的操作，找到通关的方法！',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+      return;
+    }
+
     // 检测场景元素点击
     this.handleElementClick(x, y);
   }
@@ -263,16 +283,18 @@ class GameScene extends BaseScene {
       if (element.visible === false) continue; // 跳过隐藏元素
 
       let hit = false;
+      // 应用整体下移偏移量
+      const elementY = element.y + this.topUIOffset;
 
       if (element.type === 'character' || element.type === 'item') {
         // 圆形碰撞检测
         const dx = x - element.x;
-        const dy = y - element.y;
+        const dy = y - elementY;
         hit = dx * dx + dy * dy <= 50 * 50;
       } else if (element.type === 'object') {
         // 矩形碰撞检测
         hit = x >= element.x && x <= element.x + element.width &&
-              y >= element.y && y <= element.y + element.height;
+              y >= elementY && y <= elementY + element.height;
       }
 
       if (hit) {

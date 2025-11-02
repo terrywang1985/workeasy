@@ -208,19 +208,19 @@ class Level31 extends BaseLevel {
   /**
    * 自定义渲染
    */
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     // 绘制所有元素
     this.elements.forEach(element => {
       if (element.id === 'player') {
         const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
-        this.drawElement(ctx, element, images, imageKey, 120);
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
         
-        // 如果玩家伪装了，给玩家绘制扫帚（夹在腙下）
+        // 如果玩家伪装了，给玩家绘制扫帚（夹在腋下）
         if (this.playerDisguised && images['broom'] && images['broom'].complete) {
           const broomSize = 70;
           ctx.save();
-          // 扫帚夹在腙下，从左上方向右下方倾斜
-          ctx.translate(element.x + 25, element.y - 10);
+          // 扫帚夹在腋下，从左上方向右下方倾斜
+          ctx.translate(element.x + 25, element.y - 10 + offsetY);
           ctx.rotate(Math.PI / 4); // 45度倾斜
           ctx.drawImage(
             images['broom'],
@@ -232,19 +232,19 @@ class Level31 extends BaseLevel {
           ctx.restore();
         }
       } else if (element.id === 'boss') {
-        this.drawElement(ctx, element, images, 'boss', 120);
+        this.drawElement(ctx, element, images, 'boss', 120, offsetY);
       } else if (element.id === 'door') {
-        this.drawElement(ctx, element, images, 'company_door', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'company_door', Math.max(element.width, element.height), offsetY);
       } else if (element.id === 'broom') {
         // 如果扫帚被拿走了，不显示
         if (this.playerDisguised) {
           element.visible = false;
         } else {
           element.visible = true;
-          this.drawElement(ctx, element, images, 'broom', 80);
+          this.drawElement(ctx, element, images, 'broom', 80, offsetY);
         }
       } else if (element.id === 'box') {
-        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height), offsetY);
       }
     });
   }

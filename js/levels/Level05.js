@@ -126,15 +126,15 @@ class Level05 extends BaseLevel {
     if (phone) phone.visible = true;
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
         const imageKey = element.expression === 'normal' ? 'colleague_happy' : 'player_sad';
-        this.drawElement(ctx, element, images, imageKey, 120);
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'boss') {
-        this.drawElement(ctx, element, images, 'boss', 120);
+        this.drawElement(ctx, element, images, 'boss', 120, offsetY);
       } else if (element.id === 'phone') {
-        this.drawElement(ctx, element, images, 'phone', 60);
+        this.drawElement(ctx, element, images, 'phone', 60, offsetY);
       }
     });
   }

@@ -10,7 +10,6 @@ class LevelsScene extends BaseScene {
     super(canvas, ctx, config, sceneManager);
     this.levels = [];
     this.backButton = null;
-    this.helpButton = null;
     this.levelButtons = [];
   }
 
@@ -42,11 +41,8 @@ class LevelsScene extends BaseScene {
     const { width, safeAreaTop } = this.config;
     const topOffset = Math.max(safeAreaTop, 20);
 
-    // 绘制返回按钮（左上角）
+    // 绘制返回按钮（左上角，与关卡内位置一致）
     this.backButton = this.drawCircleButton('←', 60, topOffset + 40, 40, '#fff', '#333');
-
-    // 绘制帮助按钮（右上角）
-    this.helpButton = this.drawCircleButton('?', width - 60, topOffset + 40, 40, '#fff', '#333');
 
     // 绘制标题
     this.drawText('选择关卡', width / 2, topOffset + 40, 40, '#333');
@@ -116,16 +112,6 @@ class LevelsScene extends BaseScene {
     if (this.backButton && this.isPointInCircle(x, y, this.backButton)) {
       console.log('返回主界面');
       this.sceneManager.switchScene('main');
-      return;
-    }
-
-    // 检测帮助按钮
-    if (this.helpButton && this.isPointInCircle(x, y, this.helpButton)) {
-      console.log('显示帮助（暂未实现）');
-      wx.showToast({
-        title: '帮助功能待开发',
-        icon: 'none'
-      });
       return;
     }
 

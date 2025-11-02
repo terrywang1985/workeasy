@@ -173,16 +173,16 @@ class Level10 extends BaseLevel {
     if (boss) boss.visible = true;
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120);
+        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
       } else if (element.id === 'computer') {
-        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height), offsetY);
       } else if (element.id === 'boss') {
-        this.drawElement(ctx, element, images, 'boss', 120);
+        this.drawElement(ctx, element, images, 'boss', 120, offsetY);
       } else if (element.id === 'machine') {
-        this.drawElement(ctx, element, images, 'clock_machine', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'clock_machine', Math.max(element.width, element.height), offsetY);
       }
     });
   }

@@ -125,20 +125,20 @@ class Level02 extends BaseLevel {
     return '手指被复印机夹了，疼死了！';
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
         const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
-        this.drawElement(ctx, element, images, imageKey, 120);
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'copier') {
-        this.drawElement(ctx, element, images, 'copier', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'copier', Math.max(element.width, element.height), offsetY);
       } else if (element.id === 'manual') {
         // 绘制说明书（像一本书）
         if (element.visible !== false) {
           const bookW = 50;
           const bookH = 65;
           const bookX = element.x - bookW / 2;
-          const bookY = element.y - bookH / 2;
+          const bookY = element.y - bookH / 2 + offsetY;
           
           // 书的侧面（立体感）
           ctx.fillStyle = '#6B4423';
@@ -176,7 +176,7 @@ class Level02 extends BaseLevel {
           ctx.font = '18px Arial';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          ctx.fillText(element.name, element.x, element.y + 40);
+          ctx.fillText(element.name, element.x, element.y + 40 + offsetY);
         }
       }
     });

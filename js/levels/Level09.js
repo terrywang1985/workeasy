@@ -125,14 +125,14 @@ class Level09 extends BaseLevel {
     if (usb) usb.visible = true;
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120);
+        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
       } else if (element.id === 'usb') {
-        this.drawElement(ctx, element, images, 'usb_drive', 60);
+        this.drawElement(ctx, element, images, 'usb_drive', 60, offsetY);
       } else if (element.id === 'email') {
-        this.drawElement(ctx, element, images, 'email_icon', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'email_icon', Math.max(element.width, element.height), offsetY);
       }
     });
   }

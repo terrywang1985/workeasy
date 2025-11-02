@@ -129,14 +129,14 @@ class Level04 extends BaseLevel {
     this.askedIT = false;
   }
 
-  customRender(ctx, images) {
+  customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120);
+        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
       } else if (element.id === 'it') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120);
+        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
       } else if (element.id === 'computer') {
-        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height));
+        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height), offsetY);
       }
     });
   }
