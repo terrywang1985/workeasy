@@ -1,13 +1,3 @@
-/**
- * 第3关 - 午饭时间
- * 
- * 剧情：中午了，要去食堂吃饭，但发现饭卡不见了！
- * 
- * 解谜逻辑：
- * 1. 点击抽屉，找到饭卡
- * 2. 点击食堂窗口，成功打饭
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level03 extends BaseLevel {
@@ -15,10 +5,10 @@ class Level03 extends BaseLevel {
     super();
     
     this.id = 3;
-    this.name = '午饭时间';
-    this.story = '肚子好饿...糟了，饭卡在哪儿？';
+    this.name = '投递简历';
+    this.story = '简历准备好了！开始海投吧，多投几家增加机会！';
     
-    this.hasCard = false;
+    this.sentCount = 0;
     
     this.elements = [
       {
@@ -28,26 +18,36 @@ class Level03 extends BaseLevel {
         x: 100,
         y: 400,
         clickable: false,
-        expression: 'sad'
+        expression: 'normal'
       },
       {
-        id: 'drawer',
-        name: '抽屉',
+        id: 'company1',
+        name: 'A公司',
         type: 'object',
-        x: 200,
-        y: 380,
+        x: 250,
+        y: 350,
         width: 80,
-        height: 60,
+        height: 100,
         clickable: true
       },
       {
-        id: 'window',
-        name: '食堂窗口',
+        id: 'company2',
+        name: 'B公司',
         type: 'object',
-        x: 400,
-        y: 300,
-        width: 120,
-        height: 150,
+        x: 380,
+        y: 350,
+        width: 80,
+        height: 100,
+        clickable: true
+      },
+      {
+        id: 'company3',
+        name: 'C公司',
+        type: 'object',
+        x: 510,
+        y: 350,
+        width: 80,
+        height: 100,
         clickable: true
       }
     ];
@@ -55,7 +55,7 @@ class Level03 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.hasCard = false;
+    this.sentCount = 0;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -64,74 +64,57 @@ class Level03 extends BaseLevel {
       if (element.id === 'player') {
         element.x = width * 0.2;
         element.y = baseY;
-      } else if (element.id === 'drawer') {
+      } else if (element.id === 'company1') {
         element.x = width * 0.35;
-        element.y = baseY + 20;
+        element.y = height * 0.45;
         element.width = width * 0.15;
-        element.height = height * 0.1;
-      } else if (element.id === 'window') {
-        element.x = width * 0.6;
-        element.y = height * 0.35;
-        element.width = width * 0.25;
-        element.height = height * 0.25;
+        element.height = height * 0.18;
+      } else if (element.id === 'company2') {
+        element.x = width * 0.55;
+        element.y = height * 0.45;
+        element.width = width * 0.15;
+        element.height = height * 0.18;
+      } else if (element.id === 'company3') {
+        element.x = width * 0.75;
+        element.y = height * 0.45;
+        element.width = width * 0.15;
+        element.height = height * 0.18;
       }
     });
   }
 
   onElementClick(element) {
-    console.log(`[Level03] 点击了: ${element.name}`);
-
-    switch (element.id) {
-      case 'drawer':
-        if (!this.hasCard) {
-          this.hasCard = true;
-          const player = this.elements.find(e => e.id === 'player');
-          if (player) player.expression = 'happy';
-          wx.showToast({
-            title: '找到饭卡了！💳',
-            icon: 'success',
-            duration: 1000
-          });
-        } else {
-          wx.showToast({
-            title: '已经拿了',
-            icon: 'none'
-          });
-        }
-        break;
-        
-      case 'window':
-        if (this.hasCard) {
+    if (element.id.startsWith('company') && element.visible !== false) {
+      this.sentCount++;
+      element.visible = false;
+      
+      const player = this.elements.find(e => e.id === 'player');
+      if (player) player.expression = 'happy';
+      
+      wx.showToast({
+        title: `投递成功！已投${this.sentCount}家`,
+        icon: 'success',
+        duration: 1000
+      });
+      
+      if (this.sentCount >= 3) {
+        setTimeout(() => {
           this.gameState = 'success';
           wx.showToast({
-            title: '成功打饭！',
+            title: '太棒了！投了3家公司！',
             icon: 'success'
           });
-        } else {
-          this.gameState = 'failed';
-          wx.showToast({
-            title: '没饭卡不能吃饭！',
-            icon: 'none'
-          });
-        }
-        break;
+        }, 1200);
+      }
     }
   }
 
   getSuccessMessage() {
-    return '成功吃上午饭！阿姨：多吃点，下午好干活~';
+    return '简历投递完成！接下来就等通知吧~';
   }
 
   getFailMessage() {
-    return '阿姨：没饭卡不能打饭哦！';
-  }
-
-  reset() {
-    super.reset();
-    this.hasCard = false;
-    
-    const player = this.elements.find(e => e.id === 'player');
-    if (player) player.expression = 'sad';
+    return '还需要多投几家公司...';
   }
 
   customRender(ctx, images, offsetY = 0) {
@@ -139,10 +122,22 @@ class Level03 extends BaseLevel {
       if (element.id === 'player') {
         const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
         this.drawElement(ctx, element, images, imageKey, 120, offsetY);
-      } else if (element.id === 'drawer') {
-        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
-      } else if (element.id === 'window') {
-        this.drawElement(ctx, element, images, 'canteen_window', Math.max(element.width, element.height), offsetY);
+      } else if (element.id.startsWith('company') && element.visible !== false) {
+        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height), offsetY);
+      }
+    });
+  }
+
+  reset() {
+    super.reset();
+    this.sentCount = 0;
+    
+    const player = this.elements.find(e => e.id === 'player');
+    if (player) player.expression = 'normal';
+    
+    this.elements.forEach(element => {
+      if (element.id.startsWith('company')) {
+        element.visible = true;
       }
     });
   }

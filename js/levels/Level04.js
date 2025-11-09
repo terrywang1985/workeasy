@@ -1,15 +1,3 @@
-/**
- * 第4关 - 电脑蓝屏
- * 
- * 剧情：下午要写报告，但电脑突然蓝屏了！
- * 
- * 解谜逻辑：
- * 1. 点击IT同事求助
- * 2. IT说：试试重启？
- * 3. 点击电源键重启
- * 4. 电脑恢复正常
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level04 extends BaseLevel {
@@ -17,10 +5,11 @@ class Level04 extends BaseLevel {
     super();
     
     this.id = 4;
-    this.name = '电脑蓝屏';
-    this.story = '啊！电脑蓝屏了，报告还没写完！';
+    this.name = '接面试电话';
+    this.story = '有公司打电话来了！快接电话，可能是面试通知！';
     
-    this.askedIT = false;
+    this.pickedPhone = false;
+    this.tookNote = false;
     
     this.elements = [
       {
@@ -30,25 +19,32 @@ class Level04 extends BaseLevel {
         x: 100,
         y: 400,
         clickable: false,
-        expression: 'sad'
-      },
-      {
-        id: 'it',
-        name: 'IT同事',
-        type: 'character',
-        x: 450,
-        y: 400,
-        clickable: true,
         expression: 'normal'
       },
       {
-        id: 'computer',
-        name: '电脑',
+        id: 'phone',
+        name: '手机',
+        type: 'item',
+        x: 300,
+        y: 400,
+        clickable: true
+      },
+      {
+        id: 'pen',
+        name: '笔',
+        type: 'item',
+        x: 420,
+        y: 400,
+        clickable: true
+      },
+      {
+        id: 'notebook',
+        name: '记事本',
         type: 'object',
-        x: 250,
-        y: 300,
-        width: 100,
-        height: 80,
+        x: 500,
+        y: 380,
+        width: 70,
+        height: 50,
         clickable: true
       }
     ];
@@ -56,7 +52,8 @@ class Level04 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.askedIT = false;
+    this.pickedPhone = false;
+    this.tookNote = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -65,51 +62,67 @@ class Level04 extends BaseLevel {
       if (element.id === 'player') {
         element.x = width * 0.2;
         element.y = baseY;
-      } else if (element.id === 'it') {
-        element.x = width * 0.7;
-        element.y = baseY;
-      } else if (element.id === 'computer') {
+      } else if (element.id === 'phone') {
         element.x = width * 0.4;
-        element.y = height * 0.4;
-        element.width = width * 0.2;
-        element.height = height * 0.15;
+        element.y = baseY;
+      } else if (element.id === 'pen') {
+        element.x = width * 0.6;
+        element.y = baseY;
+      } else if (element.id === 'notebook') {
+        element.x = width * 0.75;
+        element.y = baseY + 20;
+        element.width = width * 0.13;
+        element.height = height * 0.08;
       }
     });
   }
 
   onElementClick(element) {
-    console.log(`[Level04] 点击了: ${element.name}`);
-
     switch (element.id) {
-      case 'it':
-        if (!this.askedIT) {
-          this.askedIT = true;
+      case 'phone':
+        if (!this.pickedPhone) {
+          this.pickedPhone = true;
           wx.showToast({
-            title: 'IT：试试重启？',
+            title: '喂？您好！是的，我方便！',
             icon: 'none',
             duration: 2000
           });
         } else {
           wx.showToast({
-            title: 'IT：重启能解决90%问题',
+            title: 'HR：请记下面试时间地址',
             icon: 'none',
             duration: 1500
           });
         }
         break;
         
-      case 'computer':
-        if (this.askedIT) {
-          this.gameState = 'success';
+      case 'pen':
+        if (this.pickedPhone) {
           wx.showToast({
-            title: '电脑恢复正常了！',
-            icon: 'success'
+            title: '拿起了笔！',
+            icon: 'success',
+            duration: 1000
           });
         } else {
           wx.showToast({
-            title: '不知道怎么修...',
-            icon: 'none',
-            duration: 1500
+            title: '先接电话吧',
+            icon: 'none'
+          });
+        }
+        break;
+        
+      case 'notebook':
+        if (this.pickedPhone && !this.tookNote) {
+          this.tookNote = true;
+          this.gameState = 'success';
+          wx.showToast({
+            title: '记下面试信息了！',
+            icon: 'success'
+          });
+        } else if (!this.pickedPhone) {
+          wx.showToast({
+            title: '先接电话吧',
+            icon: 'none'
           });
         }
         break;
@@ -117,28 +130,32 @@ class Level04 extends BaseLevel {
   }
 
   getSuccessMessage() {
-    return '电脑修好了！IT：重启能解决90%的问题~';
+    return '太好了！明天下午2点面试，记得准时到！';
   }
 
   getFailMessage() {
-    return '还是不会修，求助IT同事吧！';
-  }
-
-  reset() {
-    super.reset();
-    this.askedIT = false;
+    return '错过了面试通知...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
-      } else if (element.id === 'it') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
-      } else if (element.id === 'computer') {
-        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height), offsetY);
+        const imageKey = this.pickedPhone ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
+      } else if (element.id === 'phone') {
+        this.drawElement(ctx, element, images, 'phone', 60, offsetY);
+      } else if (element.id === 'pen') {
+        this.drawElement(ctx, element, images, 'usb_drive', 50, offsetY);
+      } else if (element.id === 'notebook') {
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
       }
     });
+  }
+
+  reset() {
+    super.reset();
+    this.pickedPhone = false;
+    this.tookNote = false;
   }
 }
 

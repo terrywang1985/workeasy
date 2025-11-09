@@ -1,14 +1,3 @@
-/**
- * 第8关 - 会议室抢座
- * 
- * 剧情：要开会了，但会议室座位不够！
- * 
- * 解谜逻辑：
- * 1. 点击普通椅子，被别人抢了
- * 2. 点击角落的折叠椅
- * 3. 成功找到座位
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level08 extends BaseLevel {
@@ -16,8 +5,11 @@ class Level08 extends BaseLevel {
     super();
     
     this.id = 8;
-    this.name = '会议室抢座';
-    this.story = '会议马上开始了，但座位不够...';
+    this.name = '前台签到';
+    this.story = '终于到公司了！先在前台签到...';
+    
+    this.hasCheckedIn = false;
+    this.gotBadge = false;
     
     this.elements = [
       {
@@ -27,26 +19,25 @@ class Level08 extends BaseLevel {
         x: 100,
         y: 400,
         clickable: false,
-        expression: 'sad'
+        expression: 'normal'
       },
       {
-        id: 'chair1',
-        name: '好椅子',
-        type: 'object',
-        x: 280,
-        y: 350,
-        width: 60,
-        height: 80,
-        clickable: true
+        id: 'receptionist',
+        name: '前台',
+        type: 'character',
+        x: 350,
+        y: 400,
+        clickable: true,
+        expression: 'happy'
       },
       {
-        id: 'foldChair',
-        name: '折叠椅',
+        id: 'form',
+        name: '签到表',
         type: 'object',
         x: 480,
         y: 380,
-        width: 50,
-        height: 70,
+        width: 80,
+        height: 60,
         clickable: true
       }
     ];
@@ -54,6 +45,8 @@ class Level08 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
+    this.hasCheckedIn = false;
+    this.gotBadge = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -62,64 +55,80 @@ class Level08 extends BaseLevel {
       if (element.id === 'player') {
         element.x = width * 0.2;
         element.y = baseY;
-      } else if (element.id === 'chair1') {
-        element.x = width * 0.45;
-        element.y = height * 0.45;
-        element.width = width * 0.12;
-        element.height = height * 0.15;
-      } else if (element.id === 'foldChair') {
-        element.x = width * 0.7;
-        element.y = height * 0.5;
-        element.width = width * 0.1;
-        element.height = height * 0.13;
+      } else if (element.id === 'receptionist') {
+        element.x = width * 0.55;
+        element.y = baseY;
+      } else if (element.id === 'form') {
+        element.x = width * 0.75;
+        element.y = baseY + 20;
+        element.width = width * 0.15;
+        element.height = height * 0.1;
       }
     });
   }
 
   onElementClick(element) {
-    console.log(`[Level08] 点击了: ${element.name}`);
-
     switch (element.id) {
-      case 'chair1':
-        wx.showToast({
-          title: '被同事抢先坐了！',
-          icon: 'none',
-          duration: 1500
-        });
+      case 'receptionist':
+        if (!this.hasCheckedIn) {
+          wx.showToast({
+            title: '前台：您好，请先签到',
+            icon: 'none',
+            duration: 1500
+          });
+        } else if (!this.gotBadge) {
+          this.gotBadge = true;
+          this.gameState = 'success';
+          wx.showToast({
+            title: '前台：这是访客牌，请佩戴',
+            icon: 'success',
+            duration: 1500
+          });
+        }
         break;
         
-      case 'foldChair':
-        this.gameState = 'success';
-        wx.showToast({
-          title: '找到座位了！',
-          icon: 'success'
-        });
+      case 'form':
+        if (!this.hasCheckedIn) {
+          this.hasCheckedIn = true;
+          element.visible = false;
+          wx.showToast({
+            title: '签到完成！',
+            icon: 'success',
+            duration: 1000
+          });
+        }
         break;
     }
   }
 
   getSuccessMessage() {
-    return '成功找到座位！虽然是折叠椅，但能坐就行~';
+    return '签到完成！前台带你去面试会议室~';
   }
 
   getFailMessage() {
-    return '没座位了，只能站着开会...';
-  }
-
-  reset() {
-    super.reset();
+    return '还没完成签到流程...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
-      } else if (element.id === 'chair1') {
-        this.drawElement(ctx, element, images, 'office_chair', Math.max(element.width, element.height), offsetY);
-      } else if (element.id === 'foldChair') {
-        this.drawElement(ctx, element, images, 'folding_chair', Math.max(element.width, element.height), offsetY);
+        const imageKey = this.gotBadge ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
+      } else if (element.id === 'receptionist') {
+        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
+      } else if (element.id === 'form' && element.visible !== false) {
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
       }
     });
+  }
+
+  reset() {
+    super.reset();
+    this.hasCheckedIn = false;
+    this.gotBadge = false;
+    
+    const form = this.elements.find(e => e.id === 'form');
+    if (form) form.visible = true;
   }
 }
 

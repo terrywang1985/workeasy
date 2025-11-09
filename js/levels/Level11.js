@@ -1,14 +1,15 @@
 const BaseLevel = require('./BaseLevel.js');
 
-class Level01 extends BaseLevel {
+class Level11 extends BaseLevel {
   constructor() {
     super();
     
-    this.id = 1;
-    this.name = '浏览招聘网站';
-    this.story = '毕业了！是时候找份工作了，先上网看看有什么机会...';
+    this.id = 11;
+    this.name = '技能测试';
+    this.story = '面试官：现在做个技能测试，30分钟内完成';
     
-    this.openedComputer = false;
+    this.startedTest = false;
+    this.finishedTest = false;
     
     this.elements = [
       {
@@ -18,7 +19,7 @@ class Level01 extends BaseLevel {
         x: 100,
         y: 400,
         clickable: false,
-        expression: 'normal'
+        expression: 'sad'
       },
       {
         id: 'computer',
@@ -31,22 +32,22 @@ class Level01 extends BaseLevel {
         clickable: true
       },
       {
-        id: 'jobsite',
-        name: '招聘网站',
+        id: 'paper',
+        name: '试题',
         type: 'object',
         x: 480,
-        y: 320,
+        y: 380,
         width: 80,
-        height: 80,
-        clickable: true,
-        visible: false
+        height: 60,
+        clickable: true
       }
     ];
   }
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.openedComputer = false;
+    this.startedTest = false;
+    this.finishedTest = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -60,47 +61,47 @@ class Level01 extends BaseLevel {
         element.y = height * 0.4;
         element.width = width * 0.25;
         element.height = height * 0.2;
-      } else if (element.id === 'jobsite') {
-        element.x = width * 0.7;
-        element.y = height * 0.42;
+      } else if (element.id === 'paper') {
+        element.x = width * 0.75;
+        element.y = baseY + 20;
         element.width = width * 0.15;
-        element.height = width * 0.15;
-        element.visible = false;
+        element.height = height * 0.1;
       }
     });
   }
 
   onElementClick(element) {
     switch (element.id) {
-      case 'computer':
-        if (!this.openedComputer) {
-          this.openedComputer = true;
-          const jobsite = this.elements.find(e => e.id === 'jobsite');
-          if (jobsite) jobsite.visible = true;
+      case 'paper':
+        if (!this.startedTest) {
+          this.startedTest = true;
           wx.showToast({
-            title: '打开了浏览器！',
-            icon: 'success',
+            title: '看清楚题目要求...',
+            icon: 'none',
             duration: 1500
           });
         } else {
           wx.showToast({
-            title: '电脑已经开了',
+            title: '题目已经看过了',
             icon: 'none'
           });
         }
         break;
         
-      case 'jobsite':
-        if (this.openedComputer) {
+      case 'computer':
+        if (this.startedTest && !this.finishedTest) {
+          this.finishedTest = true;
           this.gameState = 'success';
           wx.showToast({
-            title: '找到好多职位！',
-            icon: 'success'
+            title: '专心答题...',
+            icon: 'success',
+            duration: 1500
           });
-        } else {
+        } else if (!this.startedTest) {
           wx.showToast({
-            title: '先打开电脑吧',
-            icon: 'none'
+            title: '先看看题目吧',
+            icon: 'none',
+            duration: 1500
           });
         }
         break;
@@ -108,32 +109,31 @@ class Level01 extends BaseLevel {
   }
 
   getSuccessMessage() {
-    return '成功找到心仪的职位！准备投简历吧~';
+    return '测试完成！面试官：做得不错，基础很扎实！';
   }
 
   getFailMessage() {
-    return '还没找到合适的工作...';
+    return '没有认真完成测试...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
+        const imageKey = this.finishedTest ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'computer') {
         this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height), offsetY);
-      } else if (element.id === 'jobsite' && element.visible) {
-        this.drawElement(ctx, element, images, 'email_icon', Math.max(element.width, element.height), offsetY);
+      } else if (element.id === 'paper') {
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
       }
     });
   }
 
   reset() {
     super.reset();
-    this.openedComputer = false;
-    
-    const jobsite = this.elements.find(e => e.id === 'jobsite');
-    if (jobsite) jobsite.visible = false;
+    this.startedTest = false;
+    this.finishedTest = false;
   }
 }
 
-module.exports = Level01;
+module.exports = Level11;

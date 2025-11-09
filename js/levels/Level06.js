@@ -1,15 +1,3 @@
-/**
- * 第6关 - 下午茶时间
- * 
- * 剧情：下午困了，需要咖啡续命，但咖啡机坏了！
- * 
- * 解谜逻辑：
- * 1. 点击同事A，他说没咖啡了
- * 2. 点击同事B，她有速溶咖啡
- * 3. 点击热水，冲咖啡
- * 4. 喝咖啡，成功续命
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level06 extends BaseLevel {
@@ -17,11 +5,11 @@ class Level06 extends BaseLevel {
     super();
     
     this.id = 6;
-    this.name = '下午茶时间';
-    this.story = '下午好困...需要咖啡续命！';
+    this.name = '选择正装';
+    this.story = '面试日到了！穿什么衣服好呢？要穿得正式一点...';
     
-    this.gotCoffee = false;
-    this.gotWater = false;
+    this.hasShirt = false;
+    this.hasPants = false;
     
     this.elements = [
       {
@@ -34,28 +22,34 @@ class Level06 extends BaseLevel {
         expression: 'sad'
       },
       {
-        id: 'colleagueA',
-        name: '同事A',
-        type: 'character',
+        id: 'tshirt',
+        name: 'T恤',
+        type: 'item',
         x: 250,
         y: 400,
-        clickable: true,
-        expression: 'normal'
+        clickable: true
       },
       {
-        id: 'colleagueB',
-        name: '同事B',
-        type: 'character',
-        x: 400,
-        y: 400,
-        clickable: true,
-        expression: 'happy'
-      },
-      {
-        id: 'water',
-        name: '热水',
+        id: 'shirt',
+        name: '衬衫',
         type: 'item',
-        x: 500,
+        x: 350,
+        y: 400,
+        clickable: true
+      },
+      {
+        id: 'jeans',
+        name: '牛仔裤',
+        type: 'item',
+        x: 450,
+        y: 400,
+        clickable: true
+      },
+      {
+        id: 'pants',
+        name: '西裤',
+        type: 'item',
+        x: 550,
         y: 400,
         clickable: true
       }
@@ -64,8 +58,8 @@ class Level06 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.gotCoffee = false;
-    this.gotWater = false;
+    this.hasShirt = false;
+    this.hasPants = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -74,13 +68,16 @@ class Level06 extends BaseLevel {
       if (element.id === 'player') {
         element.x = width * 0.15;
         element.y = baseY;
-      } else if (element.id === 'colleagueA') {
-        element.x = width * 0.35;
+      } else if (element.id === 'tshirt') {
+        element.x = width * 0.3;
         element.y = baseY;
-      } else if (element.id === 'colleagueB') {
-        element.x = width * 0.55;
+      } else if (element.id === 'shirt') {
+        element.x = width * 0.45;
         element.y = baseY;
-      } else if (element.id === 'water') {
+      } else if (element.id === 'jeans') {
+        element.x = width * 0.6;
+        element.y = baseY;
+      } else if (element.id === 'pants') {
         element.x = width * 0.75;
         element.y = baseY;
       }
@@ -88,75 +85,88 @@ class Level06 extends BaseLevel {
   }
 
   onElementClick(element) {
-    console.log(`[Level06] 点击了: ${element.name}`);
-
     switch (element.id) {
-      case 'colleagueA':
+      case 'tshirt':
         wx.showToast({
-          title: '同事A：咖啡机坏了...',
+          title: 'T恤太随便了...',
           icon: 'none',
           duration: 1500
         });
         break;
         
-      case 'colleagueB':
-        if (!this.gotCoffee) {
-          this.gotCoffee = true;
+      case 'shirt':
+        if (!this.hasShirt) {
+          this.hasShirt = true;
+          element.visible = false;
           wx.showToast({
-            title: '同事B：我有速溶咖啡~',
+            title: '穿上衬衫！',
             icon: 'success',
-            duration: 1500
+            duration: 1000
           });
-        } else {
-          wx.showToast({
-            title: '同事B：已经给你了哦',
-            icon: 'none'
-          });
+          
+          if (this.hasShirt && this.hasPants) {
+            setTimeout(() => {
+              this.gameState = 'success';
+            }, 1200);
+          }
         }
         break;
         
-      case 'water':
-        if (this.gotCoffee) {
-          this.gameState = 'success';
+      case 'jeans':
+        wx.showToast({
+          title: '牛仔裤不够正式...',
+          icon: 'none',
+          duration: 1500
+        });
+        break;
+        
+      case 'pants':
+        if (!this.hasPants) {
+          this.hasPants = true;
+          element.visible = false;
           wx.showToast({
-            title: '成功冲了咖啡！',
-            icon: 'success'
+            title: '穿上西裤！',
+            icon: 'success',
+            duration: 1000
           });
-        } else {
-          wx.showToast({
-            title: '光喝热水不管用...',
-            icon: 'none',
-            duration: 1500
-          });
+          
+          if (this.hasShirt && this.hasPants) {
+            setTimeout(() => {
+              this.gameState = 'success';
+            }, 1200);
+          }
         }
         break;
     }
   }
 
   getSuccessMessage() {
-    return '成功喝上咖啡！瞬间清醒，可以继续搬砖了~';
+    return '穿戴整齐！看起来很专业，出发吧！';
   }
 
   getFailMessage() {
-    return '没有咖啡，困死了...';
-  }
-
-  reset() {
-    super.reset();
-    this.gotCoffee = false;
-    this.gotWater = false;
+    return '穿着不够正式...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        this.drawElement(ctx, element, images, 'player_sad', 120, offsetY);
-      } else if (element.id === 'colleagueA') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
-      } else if (element.id === 'colleagueB') {
-        this.drawElement(ctx, element, images, 'colleague_happy', 120, offsetY);
-      } else if (element.id === 'water') {
-        this.drawElement(ctx, element, images, 'water_dispenser', 100, offsetY);
+        const imageKey = (this.hasShirt && this.hasPants) ? 'colleague_happy' : 'player_sad';
+        this.drawElement(ctx, element, images, imageKey, 120, offsetY);
+      } else if (element.visible !== false) {
+        this.drawElement(ctx, element, images, 'package_box', 60, offsetY);
+      }
+    });
+  }
+
+  reset() {
+    super.reset();
+    this.hasShirt = false;
+    this.hasPants = false;
+    
+    this.elements.forEach(element => {
+      if (['shirt', 'pants'].includes(element.id)) {
+        element.visible = true;
       }
     });
   }

@@ -1,14 +1,3 @@
-/**
- * 第2关 - 复印机卡纸
- * 
- * 剧情：老板让你复印文件，但复印机卡纸了！
- * 
- * 解谜逻辑：
- * 1. 直接点复印机 → 卡纸了
- * 2. 点击说明书，学会修理
- * 3. 点击复印机，成功修好
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level02 extends BaseLevel {
@@ -16,10 +5,11 @@ class Level02 extends BaseLevel {
     super();
     
     this.id = 2;
-    this.name = '复印机卡纸';
-    this.story = '老板：快去复印这份文件！但是复印机好像坏了...';
+    this.name = '准备简历';
+    this.story = '找到心仪的职位了！先准备一份像样的简历...';
     
-    this.readManual = false;
+    this.hasPhoto = false;
+    this.hasInfo = false;
     
     this.elements = [
       {
@@ -32,21 +22,31 @@ class Level02 extends BaseLevel {
         expression: 'sad'
       },
       {
-        id: 'copier',
-        name: '复印机',
-        type: 'object',
-        x: 300,
-        y: 300,
-        width: 120,
-        height: 150,
+        id: 'photo',
+        name: '证件照',
+        type: 'item',
+        x: 200,
+        y: 400,
         clickable: true
       },
       {
-        id: 'manual',
-        name: '说明书',
-        type: 'item',
+        id: 'notebook',
+        name: '笔记本',
+        type: 'object',
+        x: 350,
+        y: 380,
+        width: 80,
+        height: 60,
+        clickable: true
+      },
+      {
+        id: 'computer',
+        name: '电脑',
+        type: 'object',
         x: 500,
-        y: 420,
+        y: 300,
+        width: 120,
+        height: 100,
         clickable: true
       }
     ];
@@ -54,7 +54,8 @@ class Level02 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.readManual = false;
+    this.hasPhoto = false;
+    this.hasInfo = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -63,52 +64,64 @@ class Level02 extends BaseLevel {
       if (element.id === 'player') {
         element.x = width * 0.2;
         element.y = baseY;
-        element.expression = 'sad';
-      } else if (element.id === 'copier') {
-        element.x = width * 0.5;
-        element.y = height * 0.35;
-        element.width = width * 0.25;
-        element.height = height * 0.22;
-      } else if (element.id === 'manual') {
-        element.x = width * 0.75;
+      } else if (element.id === 'photo') {
+        element.x = width * 0.35;
         element.y = baseY;
+      } else if (element.id === 'notebook') {
+        element.x = width * 0.5;
+        element.y = baseY + 20;
+        element.width = width * 0.15;
+        element.height = height * 0.1;
+      } else if (element.id === 'computer') {
+        element.x = width * 0.7;
+        element.y = height * 0.4;
+        element.width = width * 0.2;
+        element.height = height * 0.18;
       }
     });
   }
 
   onElementClick(element) {
-    console.log(`[Level02] 点击了: ${element.name}`);
-
     switch (element.id) {
-      case 'manual':
-        if (!this.readManual) {
-          this.readManual = true;
-          const player = this.elements.find(e => e.id === 'player');
-          if (player) player.expression = 'happy';
+      case 'photo':
+        if (!this.hasPhoto) {
+          this.hasPhoto = true;
+          element.visible = false;
           wx.showToast({
-            title: '学会了！先拔电源，再取纸',
+            title: '拿到证件照了！',
             icon: 'success',
-            duration: 2000
-          });
-        } else {
-          wx.showToast({
-            title: '我已经会了！',
-            icon: 'none',
             duration: 1000
           });
         }
         break;
         
-      case 'copier':
-        if (this.readManual) {
+      case 'notebook':
+        if (!this.hasInfo) {
+          this.hasInfo = true;
+          wx.showToast({
+            title: '整理好个人信息了！',
+            icon: 'success',
+            duration: 1000
+          });
+        }
+        break;
+        
+      case 'computer':
+        if (this.hasPhoto && this.hasInfo) {
           this.gameState = 'success';
           wx.showToast({
-            title: '修好了！',
+            title: '简历制作完成！',
             icon: 'success'
+          });
+        } else if (!this.hasPhoto) {
+          wx.showToast({
+            title: '还需要证件照',
+            icon: 'none',
+            duration: 1500
           });
         } else {
           wx.showToast({
-            title: '啊！手指被夹了！',
+            title: '还需要整理个人信息',
             icon: 'none',
             duration: 1500
           });
@@ -118,76 +131,35 @@ class Level02 extends BaseLevel {
   }
 
   getSuccessMessage() {
-    return '复印机修好了！老板：不错嘛，还会修机器~';
+    return '简历做好了！看起来很专业，可以投递了~';
   }
 
   getFailMessage() {
-    return '手指被复印机夹了，疼死了！';
+    return '简历还没准备好...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        const imageKey = element.expression === 'happy' ? 'colleague_happy' : 'player_sad';
+        const imageKey = (this.hasPhoto && this.hasInfo) ? 'colleague_happy' : 'player_sad';
         this.drawElement(ctx, element, images, imageKey, 120, offsetY);
-      } else if (element.id === 'copier') {
-        this.drawElement(ctx, element, images, 'copier', Math.max(element.width, element.height), offsetY);
-      } else if (element.id === 'manual') {
-        // 绘制说明书（像一本书）
-        if (element.visible !== false) {
-          const bookW = 50;
-          const bookH = 65;
-          const bookX = element.x - bookW / 2;
-          const bookY = element.y - bookH / 2 + offsetY;
-          
-          // 书的侧面（立体感）
-          ctx.fillStyle = '#6B4423';
-          ctx.fillRect(bookX + 3, bookY + 3, bookW, bookH);
-          
-          // 书的封面
-          ctx.fillStyle = '#8B4513';
-          ctx.fillRect(bookX, bookY, bookW, bookH);
-          
-          // 书脉
-          ctx.strokeStyle = '#5D3A1A';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(bookX + bookW / 2, bookY);
-          ctx.lineTo(bookX + bookW / 2, bookY + bookH);
-          ctx.stroke();
-          
-          // 边框
-          ctx.strokeStyle = '#333';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(bookX, bookY, bookW, bookH);
-          
-          // 标题（竖向文字）
-          ctx.save();
-          ctx.fillStyle = '#FFD700';
-          ctx.font = 'bold 14px Arial';
-          ctx.textAlign = 'center';
-          ctx.translate(bookX + bookW / 2, bookY + bookH / 2);
-          ctx.rotate(-Math.PI / 2);
-          ctx.fillText('说明书', 0, 5);
-          ctx.restore();
-          
-          // 名称标签
-          ctx.fillStyle = '#333';
-          ctx.font = '18px Arial';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'top';
-          ctx.fillText(element.name, element.x, element.y + 40 + offsetY);
-        }
+      } else if (element.id === 'photo') {
+        this.drawElement(ctx, element, images, 'usb_drive', 60, offsetY);
+      } else if (element.id === 'notebook') {
+        this.drawElement(ctx, element, images, 'drawer', Math.max(element.width, element.height), offsetY);
+      } else if (element.id === 'computer') {
+        this.drawElement(ctx, element, images, 'computer_bluescreen', Math.max(element.width, element.height), offsetY);
       }
     });
   }
 
   reset() {
     super.reset();
-    this.readManual = false;
+    this.hasPhoto = false;
+    this.hasInfo = false;
     
-    const player = this.elements.find(e => e.id === 'player');
-    if (player) player.expression = 'sad';
+    const photo = this.elements.find(e => e.id === 'photo');
+    if (photo) photo.visible = true;
   }
 }
 

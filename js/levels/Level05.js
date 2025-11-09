@@ -1,13 +1,3 @@
-/**
- * 第5关 - 厕所遇老板
- * 
- * 剧情：上厕所时遇到老板，赶紧假装很忙！
- * 
- * 解谜逻辑：
- * 1. 点击手机，假装在接客户电话
- * 2. 点击老板，成功糊弄过去
- */
-
 const BaseLevel = require('./BaseLevel.js');
 
 class Level05 extends BaseLevel {
@@ -15,10 +5,12 @@ class Level05 extends BaseLevel {
     super();
     
     this.id = 5;
-    this.name = '厕所遇老板';
-    this.story = '糟了！在厕所遇到老板了...';
+    this.name = '准备面试材料';
+    this.story = '明天就要面试了！检查一下需要带什么材料...';
     
-    this.hasPretended = false;
+    this.hasResume = false;
+    this.hasId = false;
+    this.hasPortfolio = false;
     
     this.elements = [
       {
@@ -31,20 +23,37 @@ class Level05 extends BaseLevel {
         expression: 'sad'
       },
       {
-        id: 'boss',
-        name: '老板',
-        type: 'character',
-        x: 400,
+        id: 'resume',
+        name: '简历',
+        type: 'item',
+        x: 230,
         y: 400,
-        clickable: true,
-        expression: 'normal'
+        clickable: true
       },
       {
-        id: 'phone',
-        name: '手机',
+        id: 'idcard',
+        name: '身份证',
         type: 'item',
-        x: 250,
+        x: 340,
         y: 400,
+        clickable: true
+      },
+      {
+        id: 'portfolio',
+        name: '作品集',
+        type: 'item',
+        x: 450,
+        y: 400,
+        clickable: true
+      },
+      {
+        id: 'bag',
+        name: '背包',
+        type: 'object',
+        x: 550,
+        y: 360,
+        width: 80,
+        height: 100,
         clickable: true
       }
     ];
@@ -52,55 +61,92 @@ class Level05 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.hasPretended = false;
+    this.hasResume = false;
+    this.hasId = false;
+    this.hasPortfolio = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
     
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        element.x = width * 0.25;
+        element.x = width * 0.15;
         element.y = baseY;
-      } else if (element.id === 'boss') {
-        element.x = width * 0.65;
+      } else if (element.id === 'resume') {
+        element.x = width * 0.3;
         element.y = baseY;
-      } else if (element.id === 'phone') {
-        element.x = width * 0.4;
+      } else if (element.id === 'idcard') {
+        element.x = width * 0.45;
         element.y = baseY;
+      } else if (element.id === 'portfolio') {
+        element.x = width * 0.6;
+        element.y = baseY;
+      } else if (element.id === 'bag') {
+        element.x = width * 0.8;
+        element.y = height * 0.48;
+        element.width = width * 0.15;
+        element.height = height * 0.16;
       }
     });
   }
 
   onElementClick(element) {
-    console.log(`[Level05] 点击了: ${element.name}`);
-
     switch (element.id) {
-      case 'phone':
-        if (!this.hasPretended) {
-          this.hasPretended = true;
+      case 'resume':
+        if (!this.hasResume) {
+          this.hasResume = true;
           element.visible = false;
-          const player = this.elements.find(e => e.id === 'player');
-          if (player) player.expression = 'normal';
           wx.showToast({
-            title: '假装打电话：喂？王总？',
-            icon: 'none',
-            duration: 2000
+            title: '拿好简历了！',
+            icon: 'success',
+            duration: 1000
           });
         }
         break;
         
-      case 'boss':
-        if (this.hasPretended) {
+      case 'idcard':
+        if (!this.hasId) {
+          this.hasId = true;
+          element.visible = false;
+          wx.showToast({
+            title: '带上身份证！',
+            icon: 'success',
+            duration: 1000
+          });
+        }
+        break;
+        
+      case 'portfolio':
+        if (!this.hasPortfolio) {
+          this.hasPortfolio = true;
+          element.visible = false;
+          wx.showToast({
+            title: '准备好作品集！',
+            icon: 'success',
+            duration: 1000
+          });
+        }
+        break;
+        
+      case 'bag':
+        const itemCount = (this.hasResume ? 1 : 0) + (this.hasId ? 1 : 0) + (this.hasPortfolio ? 1 : 0);
+        
+        if (itemCount === 3) {
           this.gameState = 'success';
           wx.showToast({
-            title: '成功糊弄过去！',
+            title: '材料都装好了！',
             icon: 'success'
           });
         } else {
-          this.gameState = 'failed';
+          const missing = [];
+          if (!this.hasResume) missing.push('简历');
+          if (!this.hasId) missing.push('身份证');
+          if (!this.hasPortfolio) missing.push('作品集');
+          
           wx.showToast({
-            title: '老板：怎么上厕所这么久？',
-            icon: 'none'
+            title: `还缺: ${missing.join('、')}`,
+            icon: 'none',
+            duration: 2000
           });
         }
         break;
@@ -108,33 +154,40 @@ class Level05 extends BaseLevel {
   }
 
   getSuccessMessage() {
-    return '成功糊弄老板！老板：嗯，工作很积极嘛~';
+    return '材料都准备好了！明天加油，相信自己！';
   }
 
   getFailMessage() {
-    return '老板：上厕所也要摸鱼？扣工资！';
-  }
-
-  reset() {
-    super.reset();
-    this.hasPretended = false;
-    
-    const player = this.elements.find(e => e.id === 'player');
-    if (player) player.expression = 'sad';
-    
-    const phone = this.elements.find(e => e.id === 'phone');
-    if (phone) phone.visible = true;
+    return '材料还没准备齐全...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        const imageKey = element.expression === 'normal' ? 'colleague_happy' : 'player_sad';
+        const allReady = this.hasResume && this.hasId && this.hasPortfolio;
+        const imageKey = allReady ? 'colleague_happy' : 'player_sad';
         this.drawElement(ctx, element, images, imageKey, 120, offsetY);
-      } else if (element.id === 'boss') {
-        this.drawElement(ctx, element, images, 'boss', 120, offsetY);
-      } else if (element.id === 'phone') {
-        this.drawElement(ctx, element, images, 'phone', 60, offsetY);
+      } else if (element.id === 'resume' && element.visible !== false) {
+        this.drawElement(ctx, element, images, 'usb_drive', 60, offsetY);
+      } else if (element.id === 'idcard' && element.visible !== false) {
+        this.drawElement(ctx, element, images, 'coffee', 60, offsetY);
+      } else if (element.id === 'portfolio' && element.visible !== false) {
+        this.drawElement(ctx, element, images, 'drawer', 80, offsetY);
+      } else if (element.id === 'bag') {
+        this.drawElement(ctx, element, images, 'package_box', Math.max(element.width, element.height), offsetY);
+      }
+    });
+  }
+
+  reset() {
+    super.reset();
+    this.hasResume = false;
+    this.hasId = false;
+    this.hasPortfolio = false;
+    
+    this.elements.forEach(element => {
+      if (['resume', 'idcard', 'portfolio'].includes(element.id)) {
+        element.visible = true;
       }
     });
   }

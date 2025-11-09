@@ -1,14 +1,14 @@
 const BaseLevel = require('./BaseLevel.js');
 
-class Level09 extends BaseLevel {
+class Level13 extends BaseLevel {
   constructor() {
     super();
     
-    this.id = 9;
-    this.name = '自我介绍';
-    this.story = '面试官：请做个自我介绍吧';
+    this.id = 13;
+    this.name = '薪资谈判';
+    this.story = '面试官：你的期望薪资是多少？';
     
-    this.introduced = false;
+    this.negotiated = false;
     
     this.elements = [
       {
@@ -17,33 +17,43 @@ class Level09 extends BaseLevel {
         type: 'character',
         x: 100,
         y: 400,
-        clickable: true,
+        clickable: false,
         expression: 'sad'
       },
       {
         id: 'interviewer',
         name: '面试官',
         type: 'character',
-        x: 450,
+        x: 500,
         y: 400,
         clickable: false,
         expression: 'normal'
       },
       {
-        id: 'option1',
-        name: '紧张结巴',
+        id: 'salary1',
+        name: '越高越好',
         type: 'object',
-        x: 200,
+        x: 180,
         y: 300,
         width: 100,
         height: 50,
         clickable: true
       },
       {
-        id: 'option2',
-        name: '自信介绍',
+        id: 'salary2',
+        name: '参考市场行情',
         type: 'object',
-        x: 400,
+        x: 350,
+        y: 300,
+        width: 120,
+        height: 50,
+        clickable: true
+      },
+      {
+        id: 'salary3',
+        name: '什么都行',
+        type: 'object',
+        x: 520,
         y: 300,
         width: 100,
         height: 50,
@@ -54,7 +64,7 @@ class Level09 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.introduced = false;
+    this.negotiated = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -66,15 +76,20 @@ class Level09 extends BaseLevel {
       } else if (element.id === 'interviewer') {
         element.x = width * 0.7;
         element.y = baseY;
-      } else if (element.id === 'option1') {
-        element.x = width * 0.3;
+      } else if (element.id === 'salary1') {
+        element.x = width * 0.25;
         element.y = height * 0.35;
-        element.width = width * 0.2;
+        element.width = width * 0.18;
         element.height = height * 0.08;
-      } else if (element.id === 'option2') {
-        element.x = width * 0.6;
+      } else if (element.id === 'salary2') {
+        element.x = width * 0.5;
         element.y = height * 0.35;
-        element.width = width * 0.2;
+        element.width = width * 0.23;
+        element.height = height * 0.08;
+      } else if (element.id === 'salary3') {
+        element.x = width * 0.75;
+        element.y = height * 0.35;
+        element.width = width * 0.18;
         element.height = height * 0.08;
       }
     });
@@ -82,53 +97,62 @@ class Level09 extends BaseLevel {
 
   onElementClick(element) {
     switch (element.id) {
-      case 'option1':
+      case 'salary1':
         this.gameState = 'failed';
         wx.showToast({
-          title: '太紧张了，表现不好...',
+          title: '太贪心了...',
           icon: 'none',
           duration: 1500
         });
         break;
         
-      case 'option2':
-        this.introduced = true;
+      case 'salary2':
+        this.negotiated = true;
         this.gameState = 'success';
         wx.showToast({
-          title: '自信大方的介绍！',
+          title: '合理的期望！',
           icon: 'success'
+        });
+        break;
+        
+      case 'salary3':
+        this.gameState = 'failed';
+        wx.showToast({
+          title: '太没有原则了...',
+          icon: 'none',
+          duration: 1500
         });
         break;
     }
   }
 
   getSuccessMessage() {
-    return '面试官：很好！介绍得很清楚，接下来问几个问题...';
+    return '面试官：你对市场有了解，这个薪资是合理的！';
   }
 
   getFailMessage() {
-    return '面试官：你好像有点紧张...要不要喝点水？';
+    return '面试官：关于薪资，我们再考虑考虑...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        const imageKey = this.introduced ? 'colleague_happy' : 'player_sad';
+        const imageKey = this.negotiated ? 'colleague_happy' : 'player_sad';
         this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'interviewer') {
         this.drawElement(ctx, element, images, 'boss', 120, offsetY);
-      } else if (element.id.startsWith('option')) {
+      } else if (element.id.startsWith('salary')) {
         const x = element.x - element.width / 2;
         const y = element.y - element.height / 2 + offsetY;
         
-        ctx.fillStyle = '#4A90E2';
+        ctx.fillStyle = '#FF9800';
         ctx.fillRect(x, y, element.width, element.height);
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, element.width, element.height);
         
         ctx.fillStyle = '#fff';
-        ctx.font = '18px Arial';
+        ctx.font = '15px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(element.name, element.x, element.y + offsetY);
@@ -138,8 +162,8 @@ class Level09 extends BaseLevel {
 
   reset() {
     super.reset();
-    this.introduced = false;
+    this.negotiated = false;
   }
 }
 
-module.exports = Level09;
+module.exports = Level13;

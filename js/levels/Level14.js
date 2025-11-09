@@ -1,14 +1,14 @@
 const BaseLevel = require('./BaseLevel.js');
 
-class Level09 extends BaseLevel {
+class Level14 extends BaseLevel {
   constructor() {
     super();
     
-    this.id = 9;
-    this.name = '自我介绍';
-    this.story = '面试官：请做个自我介绍吧';
+    this.id = 14;
+    this.name = '提问环节';
+    this.story = '面试官：你有什么想问我的吗？';
     
-    this.introduced = false;
+    this.asked = false;
     
     this.elements = [
       {
@@ -17,21 +17,21 @@ class Level09 extends BaseLevel {
         type: 'character',
         x: 100,
         y: 400,
-        clickable: true,
-        expression: 'sad'
+        clickable: false,
+        expression: 'normal'
       },
       {
         id: 'interviewer',
         name: '面试官',
         type: 'character',
-        x: 450,
+        x: 500,
         y: 400,
         clickable: false,
         expression: 'normal'
       },
       {
-        id: 'option1',
-        name: '紧张结巴',
+        id: 'question1',
+        name: '没有了',
         type: 'object',
         x: 200,
         y: 300,
@@ -40,12 +40,12 @@ class Level09 extends BaseLevel {
         clickable: true
       },
       {
-        id: 'option2',
-        name: '自信介绍',
+        id: 'question2',
+        name: '团队氛围如何',
         type: 'object',
         x: 400,
         y: 300,
-        width: 100,
+        width: 120,
         height: 50,
         clickable: true
       }
@@ -54,7 +54,7 @@ class Level09 extends BaseLevel {
 
   init(sceneContext) {
     super.init(sceneContext);
-    this.introduced = false;
+    this.asked = false;
     
     const { width, height } = sceneContext.config;
     const baseY = height * 0.6;
@@ -66,15 +66,15 @@ class Level09 extends BaseLevel {
       } else if (element.id === 'interviewer') {
         element.x = width * 0.7;
         element.y = baseY;
-      } else if (element.id === 'option1') {
+      } else if (element.id === 'question1') {
         element.x = width * 0.3;
         element.y = height * 0.35;
-        element.width = width * 0.2;
+        element.width = width * 0.18;
         element.height = height * 0.08;
-      } else if (element.id === 'option2') {
+      } else if (element.id === 'question2') {
         element.x = width * 0.6;
         element.y = height * 0.35;
-        element.width = width * 0.2;
+        element.width = width * 0.23;
         element.height = height * 0.08;
       }
     });
@@ -82,20 +82,20 @@ class Level09 extends BaseLevel {
 
   onElementClick(element) {
     switch (element.id) {
-      case 'option1':
+      case 'question1':
         this.gameState = 'failed';
         wx.showToast({
-          title: '太紧张了，表现不好...',
+          title: '没有问题？不够积极...',
           icon: 'none',
           duration: 1500
         });
         break;
         
-      case 'option2':
-        this.introduced = true;
+      case 'question2':
+        this.asked = true;
         this.gameState = 'success';
         wx.showToast({
-          title: '自信大方的介绍！',
+          title: '很好的问题！',
           icon: 'success'
         });
         break;
@@ -103,32 +103,32 @@ class Level09 extends BaseLevel {
   }
 
   getSuccessMessage() {
-    return '面试官：很好！介绍得很清楚，接下来问几个问题...';
+    return '面试官：我们团队氛围很好，期待你的加入！';
   }
 
   getFailMessage() {
-    return '面试官：你好像有点紧张...要不要喝点水？';
+    return '面试官：好的...今天就到这里吧...';
   }
 
   customRender(ctx, images, offsetY = 0) {
     this.elements.forEach(element => {
       if (element.id === 'player') {
-        const imageKey = this.introduced ? 'colleague_happy' : 'player_sad';
+        const imageKey = this.asked ? 'colleague_happy' : 'player_sad';
         this.drawElement(ctx, element, images, imageKey, 120, offsetY);
       } else if (element.id === 'interviewer') {
         this.drawElement(ctx, element, images, 'boss', 120, offsetY);
-      } else if (element.id.startsWith('option')) {
+      } else if (element.id.startsWith('question')) {
         const x = element.x - element.width / 2;
         const y = element.y - element.height / 2 + offsetY;
         
-        ctx.fillStyle = '#4A90E2';
+        ctx.fillStyle = '#9C27B0';
         ctx.fillRect(x, y, element.width, element.height);
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, element.width, element.height);
         
         ctx.fillStyle = '#fff';
-        ctx.font = '18px Arial';
+        ctx.font = '15px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(element.name, element.x, element.y + offsetY);
@@ -138,8 +138,8 @@ class Level09 extends BaseLevel {
 
   reset() {
     super.reset();
-    this.introduced = false;
+    this.asked = false;
   }
 }
 
-module.exports = Level09;
+module.exports = Level14;
